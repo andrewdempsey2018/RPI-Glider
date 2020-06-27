@@ -105,13 +105,16 @@ while True:
   if (buttons & cwiid.BTN_B):
     print 'Button B pressed'
     radio.write('b') 
-    time.sleep(button_delay)          
+    time.sleep(button_delay)
 
-  if (buttons & cwiid.BTN_HOME):
+  if (buttons - cwiid.BTN_HOME - cwiid.BTN_2 == 0):
     print 'Home Button pressed'
-    radio.write('o') 
     time.sleep(button_delay)
 	#shutdown pi if home is pressed
+    wii.rumble = 1
+    time.sleep(1)
+    wii.rumble = 0
+    radio.write('o')
     call("sudo shutdown -h now", shell=True)          
     
   if (buttons & cwiid.BTN_MINUS):

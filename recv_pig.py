@@ -38,13 +38,15 @@ radio2.startListening()
 
 #setup the servos
 pi = pigpio.pi() # Connect to local Pi.
-pulse = 1500
+
+elevatorPulse = 1500
+rudderPulse = 1500
 
 elevatorServo = 13
 rudderServo = 12
 
-pi.set_servo_pulsewidth(rudderServo, pulse)
-pi.set_servo_pulsewidth(elevatorServo, pulse)
+pi.set_servo_pulsewidth(rudderServo, rudderPulse)
+pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
 
 #delay for allowing servos time to move
 delay = 0.1
@@ -61,45 +63,45 @@ while True:
 
     if(recv_buffer[0] == 117): #up
         print('up')
-        if(pulse>1000):
-            pulse-=50
-            pi.set_servo_pulsewidth(rudderServo, pulse)
+        if(rudderPulse>1000):
+            rudderPulse-=50
+            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 100): #down
         print('down')
-        if(pulse<2000):
-            pulse+=50
-            pi.set_servo_pulsewidth(rudderServo, pulse)
+        if(rudderPulse<2000):
+            rudderPulse+=50
+            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 108): #left
         print('left')
-        if(pulse>1000):
-            pulse-=50
-            pi.set_servo_pulsewidth(elevatorServo, pulse)
+        if(elevatorPulse>1000):
+            elevatorPulse-=50
+            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 114): #right
         print('right')
-        if(pulse<2000):
-            pulse+=50
-            pi.set_servo_pulsewidth(elevatorServo, pulse)
+        if(elevatorPulse<2000):
+            elevatorPulse+=50
+            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 97): #a
         print('a')
-        pulse = 1500
-        pi.set_servo_pulsewidth(rudderServo, pulse)
+        rudderPulse = 1500
+        pi.set_servo_pulsewidth(rudderServo, rudderPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 98): #b
         print('b')
-        pulse = 1500
-        pi.set_servo_pulsewidth(elevatorServo, pulse)
+        elevatorPulse = 1500
+        pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
         time.sleep(delay)
 
     if(recv_buffer[0] == 111): #home shutdown
-        print('home shutdown triggered')
+        print('Shutting down plane')
         #shutdown pi if controller has pressed home key 10 times
         call("sudo shutdown -h now", shell=True)

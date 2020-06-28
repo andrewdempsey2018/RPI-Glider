@@ -108,7 +108,7 @@ while True:
     time.sleep(button_delay)
 
   if (buttons - cwiid.BTN_HOME - cwiid.BTN_2 == 0):
-    print 'Home Button pressed'
+    print 'Shutting down transmitter'
     time.sleep(button_delay)
 	#shutdown pi if home is pressed
     wii.rumble = 1

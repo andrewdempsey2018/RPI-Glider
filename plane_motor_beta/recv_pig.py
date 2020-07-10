@@ -59,93 +59,127 @@ motorCalibrated = False
 
 motorSpeed = 1000
 
-while not motorCalibrated:
+#Import emum for clean switching of program state
+from enum import Enum
+
+class State(Enum):
+    MENU = 1
+    FLY = 4
+    EXIT = 3
+    CALIBRATE = 2
+
+#set the initial state of the program to FLY mode
+programState = State.FLY
+
+oncePerLoop = False #this variable is used to initialise some settings once everytime a menu is navigated
+
+motorPin = 16
+
+while True:
+
     pipe = [0]
+
     while not radio2.available(pipe):
         time.sleep(10000/1000000.0)
 
     recv_buffer = []
     radio2.read(recv_buffer, radio2.getDynamicPayloadSize())
 
-    motorSpeed = 2000
+    #Change the state of the plane program based on menu input from transmitter
 
-    pi.set_servo_pulsewidth(16, motorSpeed)
+    if(recv_buffer[0] == 102): # 'f' received, go to FLY state
+        programState = State.FLY
+        oncePerLoop = False
 
-	print("insert the motor battery and press A")
+    if(recv_buffer[0] == 99): # 'c' received, go to CALIBRATE state
+        programState = State.CALIBRATE
+        oncePerLoop = False
 
-    if(recv_buffer[0] == 97): #button a
-        motorSpeed = 1000
-        pi.set_servo_pulsewidth(16, motorSpeed)
-        time.sleep(5)
-        motorCalibrated = True
+    #FLY State
+    if(programState == State.FLY):
 
-    print("motor calibrated, starting main program")
-
-while motorCalibrated:
-    pipe = [0]
-    while not radio2.available(pipe):
-        time.sleep(10000/1000000.0)
-
-    recv_buffer = []
-    radio2.read(recv_buffer, radio2.getDynamicPayloadSize())
-    #print ("Received:") ,
-    #print (recv_buffer)
-
-    if(recv_buffer[0] == 117): #up
-        print('up')
-        if(rudderPulse>1000):
-            rudderPulse-=50
-            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 100): #down
-        print('down')
-        if(rudderPulse<2000):
-            rudderPulse+=50
-            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 108): #left
-        print('left')
-        if(elevatorPulse>1000):
-            elevatorPulse-=50
-            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 114): #right
-        print('right')
-        if(elevatorPulse<2000):
-            elevatorPulse+=50
-            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 97): #a
-        print('a')
-        rudderPulse = 1500
-        pi.set_servo_pulsewidth(rudderServo, rudderPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 98): #b
-        print('b')
-        elevatorPulse = 1500
-        pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
-        time.sleep(delay)
-
-    if(recv_buffer[0] == 111): #home shutdown
-        print('Shutting down plane')
-        #shutdown pi if controller has pressed home key 10 times
-        call("sudo shutdown -h now", shell=True)
-
-    if(recv_buffer[0] == 43): #plus
-        print('increase motor speed')
-        if(motorSpeed < 2000):
-            motorSpeed = motorSpeed + 10
-            pi.set_servo_pulsewidth(16, motorSpeed)
+        if(recv_buffer[0] == 114): #right
+            print('up')
+            if(rudderPulse>1000):
+                rudderPulse-=50
+                pi.set_servo_pulsewidth(rudderServo, rudderPulse)
             time.sleep(delay)
 
-    if(recv_buffer[0] == 45): #minus
-        print('decrease motor speed')
-        if(motorSpeed > 0):
-            motorSpeed = motorSpeed - 10
-            pi.set_servo_pulsewidth(16, motorSpeed)
+        if(recv_buffer[0] == 108): #left
+            print('down')
+            if(rudderPulse<2000):
+                rudderPulse+=50
+                pi.set_servo_pulsewidth(rudderServo, rudderPulse)
             time.sleep(delay)
+
+        if(recv_buffer[0] == 100): #down
+            print('left')
+            if(elevatorPulse>1000):
+                elevatorPulse-=50
+                pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
+            time.sleep(delay)
+
+        if(recv_buffer[0] == 117): #up
+            print('right')
+            if(elevatorPulse<2000):
+                elevatorPulse+=50
+                pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
+            time.sleep(delay)
+
+        if(recv_buffer[0] == 97): #a
+            #print('a')
+            #rudderPulse = 1500
+            #pi.set_servo_pulsewidth(rudderServo, rudderPulse)
+            #time.sleep(delay)
+
+        if(recv_buffer[0] == 98): #b
+            print('a&b')
+            elevatorPulse = 1500
+            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
+            rudderPulse = 1500
+            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
+            time.sleep(delay)
+
+        if(recv_buffer[0] == 111): #received 'o' from transmitter, trigger shutdown
+            print('Shutting down plane')
+            call("sudo shutdown -h now", shell=True)
+
+        if(recv_buffer[0] == 43): #plus
+            print('increase motor speed')
+            if(motorSpeed < 2000):
+                motorSpeed = motorSpeed + 10
+                pi.set_servo_pulsewidth(motorPin, motorSpeed)
+                time.sleep(delay)
+
+        if(recv_buffer[0] == 45): #minus
+            print('decrease motor speed')
+            if(motorSpeed > 0):
+                motorSpeed = motorSpeed - 10
+                pi.set_servo_pulsewidth(motorPin, motorSpeed)
+                time.sleep(delay)
+
+    #CALIBRATE State
+    if(programState == State.CALIBRATE):
+
+        if not(oncePerLoop):
+            oncePerLoop = True
+            motorSpeed = 1000
+            pi.set_servo_pulsewidth(motorPin, motorSpeed)
+
+            elevatorPulse = 1500
+            pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
+            rudderPulse = 1500
+            pi.set_servo_pulsewidth(rudderServo, rudderPulse)
+            time.sleep(delay)
+
+       if(recv_buffer[0] == 43): #plus
+           print('Max set, plug in lipo')
+           motorSpeed = 2000
+           pi.set_servo_pulsewidth(motorPin, motorSpeed)
+           time.sleep(delay)
+
+        if(recv_buffer[0] == 45): #minus
+           print('min set, motor ready')
+           motorSpeed = 1000
+           pi.set_servo_pulsewidth(motorPin, motorSpeed)
+           time.sleep(delay)

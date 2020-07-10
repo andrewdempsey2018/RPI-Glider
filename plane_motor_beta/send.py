@@ -187,21 +187,20 @@ while True:
             print('Up pressed, going to FLY mode')
             oncePerLoop = False
             programState = State.FLY
-            #radio.write('u')       
+            radio.write('f')       
             #time.sleep(button_delay)
 
         if (buttons & cwiid.BTN_DOWN):
             print('Down pressed, going to Calibrate mode')
             oncePerLoop = False
             programState = State.CALIBRATE
-            #radio.write('u')       
+            radio.write('c')       
             #time.sleep(button_delay)
 
         if (buttons & cwiid.BTN_LEFT):
             print('Left pressed, going to EXIT menu')
             oncePerLoop = False
             programState = State.EXIT
-            #radio.write('u')       
             #time.sleep(button_delay)
 
     if(programState == State.EXIT):

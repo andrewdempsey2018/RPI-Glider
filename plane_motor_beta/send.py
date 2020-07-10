@@ -168,25 +168,6 @@ while True:
             radio.write('b') 
             time.sleep(button_delay)
 
-        if (buttons - cwiid.BTN_HOME - cwiid.BTN_2 == 0):
-            print('Shutting down transmitter')
-            time.sleep(button_delay)
-	        #shutdown pi if home is pressed
-            wii.rumble = 1
-            time.sleep(1)
-            wii.rumble = 0
-            radio.write('o')
-            call("sudo shutdown -h now", shell=True)          
-    
-        if (buttons & cwiid.BTN_MINUS):
-            print('Minus Button pressed')
-            time.sleep(button_delay)   
-    
-        if (buttons & cwiid.BTN_PLUS):
-            print('Plus Button pressed')
-            radio.write('+')
-            time.sleep(button_delay)
- 
         if (buttons & cwiid.BTN_MINUS):
             print('Minus Button pressed')
             radio.write('-')
@@ -233,6 +214,19 @@ while True:
             wii.led = 8
             print("Program in EXIT menu")
 
+        if (buttons & cwiid.BTN_UP):
+            print('Up pressed, going to FLY mode')
+            oncePerLoop = False
+            programState = State.FLY
+            #radio.write('u')       
+            #time.sleep(button_delay)
+
+        if (buttons & cwiid.BTN_2):
+            print('Shutting down transmitter')
+            rumble()
+            radio.write('o')
+            call("sudo shutdown -h now", shell=True) 
+
     if(programState == State.CALIBRATE):
 
         buttons = wii.state['buttons']
@@ -242,6 +236,15 @@ while True:
             oncePerLoop = True
             wii.led = 4
             print("Program in MOTOR CALIBRATE mode")
+
+        if (buttons & cwiid.BTN_MINUS):
+            print('Minus Button pressed')
+            time.sleep(button_delay)   
+    
+        if (buttons & cwiid.BTN_PLUS):
+            print('Plus Button pressed')
+            radio.write('+')
+            time.sleep(button_delay)
 
     # used for determining how long A button is pressed
     aPressedEnd = getMillis()

@@ -55,8 +55,6 @@ delay = 0.1
 #max servo is 2000
 #mid servo is 1500
 
-motorCalibrated = False
-
 motorSpeed = 1000
 
 #Import emum for clean switching of program state
@@ -74,6 +72,10 @@ programState = State.FLY
 oncePerLoop = False #this variable is used to initialise some settings once everytime a menu is navigated
 
 motorPin = 16
+
+#to ensure max and min motor value is only set once per caibration
+maxSet = False
+minSet = False
 
 while True:
 
@@ -97,6 +99,10 @@ while True:
 
     #FLY State
     if(programState == State.FLY):
+
+        if not(oncePerLoop):
+            print("Plane in FLY mode")
+            oncePerLoop = True
 
         if(recv_buffer[0] == 114): #right
             print('up')
@@ -126,7 +132,7 @@ while True:
                 pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
             time.sleep(delay)
 
-        if(recv_buffer[0] == 97): #a
+        #if(recv_buffer[0] == 97): #a
             #print('a')
             #rudderPulse = 1500
             #pi.set_servo_pulsewidth(rudderServo, rudderPulse)
@@ -148,23 +154,33 @@ while True:
             print('increase motor speed')
             if(motorSpeed < 2000):
                 motorSpeed = motorSpeed + 10
-                pi.set_servo_pulsewidth(motorPin, motorSpeed)
+                print(motorSpeed)
+                #pi.set_servo_pulsewidth(motorPin, motorSpeed)
                 time.sleep(delay)
 
         if(recv_buffer[0] == 45): #minus
             print('decrease motor speed')
-            if(motorSpeed > 0):
+            if(motorSpeed > 1000):
                 motorSpeed = motorSpeed - 10
-                pi.set_servo_pulsewidth(motorPin, motorSpeed)
+                print(motorSpeed)
+                #pi.set_servo_pulsewidth(motorPin, motorSpeed)
                 time.sleep(delay)
+
+        #if(recv_buffer[0] == 104): #user has pressed home button, stop motor
+            
+    #set the motor to spin at the speed currently set
+    pi.set_servo_pulsewidth(motorPin, motorSpeed)
 
     #CALIBRATE State
     if(programState == State.CALIBRATE):
 
         if not(oncePerLoop):
+            print("Plane in CALIBRATE mode")
             oncePerLoop = True
-            motorSpeed = 1000
-            pi.set_servo_pulsewidth(motorPin, motorSpeed)
+            maxSet = False
+            minSet = False
+            #motorSpeed = 1000
+            #pi.set_servo_pulsewidth(motorPin, motorSpeed)
 
             elevatorPulse = 1500
             pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
@@ -172,14 +188,18 @@ while True:
             pi.set_servo_pulsewidth(rudderServo, rudderPulse)
             time.sleep(delay)
 
-       if(recv_buffer[0] == 43): #plus
-           print('Max set, plug in lipo')
-           motorSpeed = 2000
-           pi.set_servo_pulsewidth(motorPin, motorSpeed)
-           time.sleep(delay)
+        if(recv_buffer[0] == 43): #plus
+           if not(maxSet):
+               maxSet = True
+               print('Max set, plug in lipo')
+               motorSpeed = 2000
+               pi.set_servo_pulsewidth(motorPin, motorSpeed)
+               time.sleep(delay)
 
         if(recv_buffer[0] == 45): #minus
-           print('min set, motor ready')
-           motorSpeed = 1000
-           pi.set_servo_pulsewidth(motorPin, motorSpeed)
-           time.sleep(delay)
+           if not(minSet):
+               minSet = True
+               print('min set, motor ready')
+               motorSpeed = 1000
+               pi.set_servo_pulsewidth(motorPin, motorSpeed)
+               time.sleep(delay)

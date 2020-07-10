@@ -122,10 +122,10 @@ while True:
 
         # If Plus and Minus buttons pressed
         # together then rumble and quit.
-        if (buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0):  
-            print('\nClosing connection ...')
-            rumble()
-            exit(wii)  
+        #if (buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0):  
+        #    print('\nClosing connection ...')
+        #    rumble()
+        #    exit(wii)  
   
         # Check if other buttons are pressed by
         # doing a bitwise AND of the buttons number
@@ -171,6 +171,16 @@ while True:
         if (buttons & cwiid.BTN_MINUS):
             print('Minus Button pressed')
             radio.write('-')
+            time.sleep(button_delay)
+
+        if (buttons & cwiid.BTN_PLUS):
+            print('Plus Button pressed')
+            radio.write('+')
+            time.sleep(button_delay)
+
+        if (buttons & cwiid.BTN_HOME):
+            print('Home Button pressed')
+            radio.write('h')
             time.sleep(button_delay)
 
     if(programState == State.MENU):
@@ -238,6 +248,7 @@ while True:
 
         if (buttons & cwiid.BTN_MINUS):
             print('Minus Button pressed')
+            radio.write('-')
             time.sleep(button_delay)   
     
         if (buttons & cwiid.BTN_PLUS):

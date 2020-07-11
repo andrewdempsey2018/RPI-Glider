@@ -152,6 +152,7 @@ while True:
     
         if (buttons & cwiid.BTN_1):
             print('Button 1 pressed')
+            radio.write('1')
             time.sleep(button_delay)          
 
         if (buttons & cwiid.BTN_2):

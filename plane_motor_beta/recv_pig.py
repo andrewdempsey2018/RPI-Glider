@@ -77,6 +77,9 @@ motorPin = 16
 maxSet = False
 minSet = False
 
+def getMillis():
+    return int(round(time.time() * 1000))
+
 while True:
 
     pipe = [0]
@@ -99,6 +102,8 @@ while True:
 
     #FLY State
     if(programState == State.FLY):
+
+        motorStartTime = getMillis()
 
         if not(oncePerLoop):
             print("Plane in FLY mode")
@@ -166,11 +171,18 @@ while True:
                 #pi.set_servo_pulsewidth(motorPin, motorSpeed)
                 time.sleep(delay)
 
-        #if(recv_buffer[0] == 104): #user has pressed home button, stop motor
-            
-    #set the motor to spin at the speed currently set
-    pi.set_servo_pulsewidth(motorPin, motorSpeed)
+        if(recv_buffer[0] == 104): #user has pressed home button, stop motor
+            print('Turn off motor quickly')
+            if(motorSpeed > 1000):
+                motorSpeed = motorSpeed - 100
+                if(motorSpeed < 1000):
+                    motorSpeed = 1000
+                #pi.set_servo_pulsewidth(motorPin, motorSpeed)
 
+        #if(recv_buffer[0] == 49): #user has pressed button 1
+
+        pi.set_servo_pulsewidth(motorPin, motorSpeed)
+        
     #CALIBRATE State
     if(programState == State.CALIBRATE):
 
@@ -179,9 +191,12 @@ while True:
             oncePerLoop = True
             maxSet = False
             minSet = False
-            #motorSpeed = 1000
-            #pi.set_servo_pulsewidth(motorPin, motorSpeed)
 
+            #make sure motor is off by default before calibrating
+            motorSpeed = 1000
+            pi.set_servo_pulsewidth(motorPin, motorSpeed)
+
+            #set servos to center
             elevatorPulse = 1500
             pi.set_servo_pulsewidth(elevatorServo, elevatorPulse)
             rudderPulse = 1500

@@ -65,9 +65,10 @@ from enum import Enum
 
 class State(Enum):
     MENU = 1
-    FLY = 4
-    EXIT = 3
     CALIBRATE = 2
+    EXIT = 3
+    FLY = 4
+    RANGE_TEST = 5
 
 #set the initial state of the program to FLY mode
 programState = State.FLY
@@ -224,3 +225,6 @@ while True:
                motorSpeed = MIN_MOTOR_SPEED
                pi.set_servo_pulsewidth(motorPin, motorSpeed)
                time.sleep(delay)
+
+    #RANGE_TEST State
+    if(programState == State.RANGE_TEST):

@@ -34,9 +34,10 @@ from enum import Enum
 
 class State(Enum):
     MENU = 1
-    FLY = 4
-    EXIT = 3
     CALIBRATE = 2
+    EXIT = 3
+    FLY = 4
+    RANGE_TEST = 5
 
 #set the initial state of the program to FLY mode
 programState = State.FLY

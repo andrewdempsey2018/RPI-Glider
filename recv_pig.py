@@ -107,6 +107,16 @@ while True:
         programState = State.CALIBRATE
         oncePerLoop = False
 
+    if(recv_buffer[0] == 103): # 'g' received, go to RANGE_TEST state
+        programState = State.RANGE_TEST
+        oncePerLoop = False
+
+        #RANGE_TEST State
+    if(programState == State.RANGE_TEST):
+        radio2.write('!')
+        print("!")
+        time.sleep(3)
+
     #FLY State
     if(programState == State.FLY):
 
@@ -226,5 +236,3 @@ while True:
                pi.set_servo_pulsewidth(motorPin, motorSpeed)
                time.sleep(delay)
 
-    #RANGE_TEST State
-    if(programState == State.RANGE_TEST):

@@ -1,4 +1,4 @@
-# RPI Glider
+# RPI Plane
 
 ![Picture of a small glider](pics/plane1.png)
 
@@ -11,6 +11,10 @@
 ![Picture of a typical hardware requirements](pics/setup1.png)
 
 *Image 2. Here we see 2 RPI's, two servos, a Wii remote for controling the plane, two lora modules for radio communication*
+
+![Connecting the LORA module to RPI](pics/lora_to_pi.png)
+
+*Image 3. Wiring diagram for connections of RPI to LORA*
 
 ## Details
 

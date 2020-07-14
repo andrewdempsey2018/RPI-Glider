@@ -16,18 +16,16 @@ import cwiid
 from subprocess import call
 
 #function definitions
-def rumble():
-  wii.rumble = 1
-  time.sleep(0.25)
-  wii.rumble = 0
-  time.sleep(0.25)
-  wii.rumble = 1
-  time.sleep(0.25)
-  wii.rumble = 0
-  time.sleep(0.25)
+def rumble(numberOfRumbles):
+
+    for rum in range(numberOfRumbles):
+        wii.rumble = 1
+        time.sleep(0.25)
+        wii.rumble = 0
+        time.sleep(0.25)  
 
 def getMillis():
-  return int(round(time.time() * 1000))
+    return int(round(time.time() * 1000))
 
 #Import emum for clean switching of program state
 from enum import Enum
@@ -81,8 +79,8 @@ print('Wii Remote connected...\n')
 print('Press some buttons!\n')
 print('Press PLUS and MINUS together to disconnect and quit.\n')
 
-#rumble on good connection
-rumble()
+#rumble twice on good connection
+rumble(2)
 
 wii.rpt_mode = cwiid.RPT_BTN
 
@@ -94,6 +92,14 @@ oncePerLoop = False #this variable is used to initialise some settings once ever
 
 #This loop contains functionality that is universal to the program
 while True:
+
+    pipe = [0]
+
+    while not radio.available(pipe):
+        time.sleep(10000/1000000.0)
+
+    recv_buffer = []
+    radio.read(recv_buffer, radio.getDynamicPayloadSize())
 
     buttons = wii.state['buttons']
 
@@ -215,6 +221,12 @@ while True:
             programState = State.EXIT
             #time.sleep(button_delay)
 
+        if (buttons & cwiid.BTN_RIGHT):
+            print('Right pressed, going to RANGE_TEST')
+            oncePerLoop = False
+            programState = State.RANGE_TEST
+            radio.write('g') #send g to the receiver to tell it to go to range test mode
+
     if(programState == State.EXIT):
 
         buttons = wii.state['buttons']
@@ -234,7 +246,7 @@ while True:
 
         if (buttons & cwiid.BTN_2):
             print('Shutting down transmitter')
-            rumble()
+            rumble(3)
             radio.write('o')
             call("sudo shutdown -h now", shell=True) 
 
@@ -260,3 +272,12 @@ while True:
 
     # used for determining how long A button is pressed
     aPressedEnd = getMillis()
+
+    #RANGE_TEST State
+    if(programState == State.RANGE_TEST):
+
+
+        radio.write('m')
+        if(recv_buffer[0] == 33): #b
+            rumble(1)
+            #wii.led = 15
